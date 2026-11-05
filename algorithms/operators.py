@@ -3,6 +3,7 @@ algorithms/operators.py
 Defines candidate neighborhood generation and genetic recombination operators.
 """
 
+import random
 from typing import List
 from core.state import State
 from core.problem import CommuteProblem
@@ -13,7 +14,7 @@ def get_neighbors(state: State, problem: CommuteProblem) -> List[State]:
     Generates a set of valid neighboring configurations for the current state.
 
     Guidelines:
-    - Explore both modifications to departure_time and topological adjustments to path.
+    - Explore both modifications to departure_time and topological adjustments to path. 
     - Every returned candidate must be a valid, loop-free path starting at problem.origin
       and ending at problem.destination.
     - Departure times must remain within [problem.t_min, problem.t_max].
@@ -68,7 +69,7 @@ def get_neighbors(state: State, problem: CommuteProblem) -> List[State]:
                     if new_path != path:
                         add(new_path, state.departure_time)
 
-        return neighbors
+    return neighbors
     # TODO: Implement neighborhood generation
     # raise NotImplementedError("Implement get_neighbors in algorithms/operators.py")
 
@@ -97,5 +98,30 @@ def crossover(parent1: State, parent2: State, problem: CommuteProblem) -> State:
     Returns:
         State: A newly generated child State.
     """
+    t = (parent1.departure_time + parent2.departure_time) / 2
+    t = problem.t_min + round((t - problem.t_min) / problem.t_step) * problem.t_step
+    t = max(problem.t_min, min(problem.t_max, t))
+
+    p1 = parent1.path
+    p2 = parent2.path
+    common = []
+    for i in range(1, len(p1) - 1):
+        if p1[i] in p2[1:-1]:
+            common.append(p1[i])
+    random.shuffle(common)
+
+    for k in range(len(common)):
+        i1 = p1.index(common[k])
+        i2 = p2.index(common[k])
+        new_path = p1[:i1 + 1] + p2[i2 + 1:]
+        if len(set(new_path)) == len(new_path):         
+            child = State(new_path, t)
+            if problem.is_valid_state(child):
+                return child
+
+    neighbors = get_neighbors(parent1, problem)
+    if neighbors:
+        return random.choice(neighbors)
+    return parent1
     # TODO: Implement genetic crossover
-    raise NotImplementedError("Implement crossover in algorithms/operators.py")
+    # raise NotImplementedError("Implement crossover in algorithms/operators.py")

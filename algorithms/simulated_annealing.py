@@ -34,9 +34,11 @@ class SimulatedAnnealingSolver(LocalSearchSolver):
         Prohibited:
         - Ignoring the temperature parameter or turning this into pure hill climbing.
         """
+        # TODO: Implement Simulated Annealing
         current = self.problem.generate_initial_state()
         current_temprature = self.initial_temp
         infinity = self.max_iterations
+        current_cost = self.problem.evaluate(current)
         self.history = []
         visited = [(current_cost, current)]
         for i in range(infinity):
@@ -53,13 +55,17 @@ class SimulatedAnnealingSolver(LocalSearchSolver):
             delta_cost = next_cost - current_cost
             if delta_cost < 0:
                 current = next_state
+                current_cost = next_cost
             else:
                 acceptance_probability = math.exp(-delta_cost / current_temprature)
                 if random.random() < acceptance_probability:
                     current = next_state
+                    current_cost = next_cost
             visited.append((current_cost, current))
             self.history.append(self.problem.evaluate(current))
         visited.sort(key=lambda x: x[0])
         return visited[0][1], visited[0][0]
-        # TODO: Implement Simulated Annealing
-        raise NotImplementedError("Implement solve() in algorithms/simulated_annealing.py")
+
+
+
+        # raise NotImplementedError("Implement solve() in algorithms/simulated_annealing.py")

@@ -70,4 +70,4 @@ class LocalBeamSearchSolver(LocalSearchSolver):
 
         return beststate, bestcost
         # TODO: Implement Local Beam Search
-        raise NotImplementedError("Implement solve() in algorithms/beam_search.py")
+        # raise NotImplementedError("Implement solve() in algorithms/beam_search.py")
