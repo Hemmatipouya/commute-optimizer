@@ -38,8 +38,39 @@ def get_neighbors(state: State, problem: CommuteProblem) -> List[State]:
     Returns:
         List[State]: A list of valid neighboring State objects.
     """
+    neighbors: List[State] = []
+    seen = {state}
+    path = state.path
+    net = problem.network
+
+    def add(new_path, time):
+        cand = State(new_path, time)
+        if cand not in seen and problem.is_valid_state(cand):
+            seen.add(cand)
+            neighbors.append(cand)
+
+    add(path, state.departure_time - problem.t_step)
+    add(path, state.departure_time + problem.t_step)
+
+    for i in range(len(path) - 1):
+        for j in range(i + 1, len(path)):
+            u, w = path[i], path[j]
+            outside = set(path[:i]) | set(path[j + 1:])   
+
+            if j > i + 1 and net.has_edge(u, w):
+                add(path[:i + 1] + path[j:], state.departure_time)
+
+            for v in net.get_neighbors(u):
+                if v in outside or v == u or v == w:
+                    continue
+                if net.has_edge(v, w):
+                    new_path = path[:i + 1] + (v,) + path[j:]
+                    if new_path != path:
+                        add(new_path, state.departure_time)
+
+        return neighbors
     # TODO: Implement neighborhood generation
-    raise NotImplementedError("Implement get_neighbors in algorithms/operators.py")
+    # raise NotImplementedError("Implement get_neighbors in algorithms/operators.py")
 
 
 def crossover(parent1: State, parent2: State, problem: CommuteProblem) -> State:
